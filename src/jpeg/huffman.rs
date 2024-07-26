@@ -1,9 +1,11 @@
-use std::iter::repeat;
 use std::cmp::min;
+use std::iter::repeat;
 
 // Selects i bits, from msb to lsb.
-const BIT_MASKS: [u16; 17] = [0x0, 0x8000, 0xC000, 0xE000, 0xF000, 0xF800, 0xFC00, 0xFE00, 0xFF00,
-                              0xFF80, 0xFFC0, 0xFFE0, 0xFFF0, 0xFFF8, 0xFFFC, 0xFFFE, 0xFFFF];
+const BIT_MASKS: [u16; 17] = [
+    0x0, 0x8000, 0xC000, 0xE000, 0xF000, 0xF800, 0xFC00, 0xFE00, 0xFF00, 0xFF80, 0xFFC0, 0xFFE0,
+    0xFFF0, 0xFFF8, 0xFFFC, 0xFFFE, 0xFFFF,
+];
 
 // TODO: Naming in this file is so bad..
 // size_table? table? code_vecs? bah..
@@ -42,26 +44,26 @@ impl HuffmanTable {
         // id -> 0b10101
         let code_table: Vec<u16> = HuffmanTable::make_code_table(&code_lengths);
 
-        let codes: Vec<HuffmanCode> = data_table.iter()
+        let codes: Vec<HuffmanCode> = data_table
+            .iter()
             .zip(code_lengths.iter())
             .zip(code_table.iter())
-            .map(|((&value, &length), &code)| {
-                HuffmanCode {
-                    length: length,
-                    code: code,
-                    value: value,
-                }
+            .map(|((&value, &length), &code)| HuffmanCode {
+                length,
+                code,
+                value,
             })
             .collect();
 
-        HuffmanTable { codes: codes }
+        HuffmanTable { codes }
     }
 
     pub fn codes_of_length(&self, len: usize) -> &[HuffmanCode] {
         assert!(len >= 2);
         assert!(len < 17);
         let len_u8 = len as u8;
-        let mut codes_of_length = self.codes
+        let mut codes_of_length = self
+            .codes
             .iter()
             .enumerate()
             .skip_while(|&(_, code)| code.length != len_u8)
@@ -100,7 +102,9 @@ impl HuffmanTable {
 
 impl Clone for HuffmanTable {
     fn clone(&self) -> HuffmanTable {
-        HuffmanTable { codes: self.codes.iter().cloned().collect() }
+        HuffmanTable {
+            codes: self.codes.to_vec(),
+        }
     }
 }
 
@@ -124,13 +128,15 @@ impl<'a> HuffmanDecoder<'a> {
     pub fn new(data: &'a [u8]) -> HuffmanDecoder<'a> {
         // TODO: Revisit this: is it weird to read from `data` in
         // the constructor?
-        let current = ((data[0] as u32) << 24) | ((data[1] as u32) << 16) |
-                      ((data[2] as u32) << 8) | (data[3] as u32);
+        let current = ((data[0] as u32) << 24)
+            | ((data[1] as u32) << 16)
+            | ((data[2] as u32) << 8)
+            | (data[3] as u32);
         HuffmanDecoder {
-            data: data,
+            data,
             next_index: 4,
             bits_read: 0,
-            current: current,
+            current,
         }
     }
 
@@ -202,7 +208,7 @@ impl<'a> HuffmanDecoder<'a> {
         assert!(n <= 16, "Should not read more than 16 bits at a time!");
         let mask = BIT_MASKS[n];
         let current_16 = (self.current >> 16) as u16;
-        let number = ((current_16 & mask) >> (16 - n)) as u16;
+        let number = (current_16 & mask) >> (16 - n);
         self.shift_and_fix_current(n);
         number
     }
@@ -213,9 +219,11 @@ impl<'a> HuffmanDecoder<'a> {
             .flat_map(|len| {
                 let mask = BIT_MASKS[len];
                 let current_16 = (self.current >> 16) as u16;
-                let bits = ((current_16 & mask) >> (16 - len)) as u16;
+                let bits = (current_16 & mask) >> (16 - len);
 
-                table.codes_of_length(len).iter()
+                table
+                    .codes_of_length(len)
+                    .iter()
                     // Find the code ID of length `len`, and code bits `bits`
                     .find(|&code| code.code == bits)
                     .map(|code| {
@@ -263,7 +271,7 @@ impl<'a> HuffmanDecoder<'a> {
         if val < base {
             -2 * base + 1 + val
         } else {
-            val as i16
+            val
         }
     }
 }

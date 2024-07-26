@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate itertools;
+mod jpeg;
 #[allow(unused_variables)]
 #[allow(dead_code)]
 mod transform;
-mod jpeg;
 
 use std::env;
 use std::fs::File;
@@ -11,12 +11,12 @@ use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 
-use jpeg::*;
+use jpeg::JPEGImage;
 
 fn file_to_bytes(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     File::open(path).and_then(|mut file| {
         let mut bytes = Vec::new();
-        try!(file.read_to_end(&mut bytes));
+        file.read_to_end(&mut bytes)?;
         Ok(bytes)
     })
 }

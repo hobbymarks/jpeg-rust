@@ -13,7 +13,7 @@ fn usize_square(n: usize) -> Option<usize> {
 }
 
 #[allow(non_upper_case_globals)]
-const Pi: f32 = PI as f32;
+const Pi: f32 = PI;
 
 pub fn discrete_cosine_transform(input: &[f32]) -> Vec<f32> {
     let alpha = |u| {
@@ -40,8 +40,9 @@ pub fn discrete_cosine_transform(input: &[f32]) -> Vec<f32> {
                     let yf = y as f32;
                     let xf = x as f32;
 
-                    let prod = gxy * ((2f32 * xf + 1f32) * uf * Pi / 16f32).cos() *
-                               ((2f32 * yf + 1f32) * vf * Pi / 16f32).cos();
+                    let prod = gxy
+                        * ((2f32 * xf + 1f32) * uf * Pi / 16f32).cos()
+                        * ((2f32 * yf + 1f32) * vf * Pi / 16f32).cos();
                     sum += prod;
                 }
             }
@@ -74,9 +75,11 @@ pub fn discrete_cosine_transform_inverse(input: &[f32]) -> Vec<f32> {
                     let vf = v as f32;
 
                     let f_uv = input[v * d + u];
-                    sum += alpha(u) * alpha(v) * f_uv *
-                           ((2f32 * xf + 1f32) * uf * Pi / 16f32).cos() *
-                           ((2f32 * yf + 1f32) * vf * Pi / 16f32).cos();
+                    sum += alpha(u)
+                        * alpha(v)
+                        * f_uv
+                        * ((2f32 * xf + 1f32) * uf * Pi / 16f32).cos()
+                        * ((2f32 * yf + 1f32) * vf * Pi / 16f32).cos();
                 }
             }
             vec.push(sum / 4f32);

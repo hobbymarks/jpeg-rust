@@ -1,5 +1,5 @@
-pub mod huffman;
 pub mod decoder;
+pub mod huffman;
 
 use jpeg::decoder::JPEGDecoder;
 
@@ -272,29 +272,29 @@ impl JPEGImage {
                             let component_id = vec[index];
                             let horizontal_sampling_factor = (vec[index + 1] & 0xf0) >> 4;
                             let vertical_sampling_factor = vec[index + 1] & 0x0f;
-                            assert!(horizontal_sampling_factor > 0 &&
-                                    horizontal_sampling_factor < 3);
+                            assert!(
+                                horizontal_sampling_factor > 0 && horizontal_sampling_factor < 3
+                            );
                             assert!(vertical_sampling_factor > 0 && vertical_sampling_factor < 3);
                             let quantization_selector = vec[index + 2];
 
                             frame_components.push(FrameComponentHeader {
-                                component_id: component_id,
-                                horizontal_sampling_factor: horizontal_sampling_factor,
-                                vertical_sampling_factor: vertical_sampling_factor,
-                                quantization_selector: quantization_selector,
+                                component_id,
+                                horizontal_sampling_factor,
+                                vertical_sampling_factor,
+                                quantization_selector,
                             });
                             index += 3;
                         }
                         let frame_header = FrameHeader {
-                            sample_precision: sample_precision,
-                            num_lines: num_lines,
-                            samples_per_line: samples_per_line,
-                            image_components: image_components,
-                            frame_components: frame_components,
+                            sample_precision,
+                            num_lines,
+                            samples_per_line,
+                            image_components,
+                            frame_components,
                         };
                         image.dimensions = (samples_per_line, num_lines);
                         image.frame_header = Some(frame_header);
-
                     }
                     Marker::DefineHuffmanTable => {
                         // JPEG B.2.4.2
@@ -314,12 +314,12 @@ impl JPEGImage {
                             huffman_index += 16;
 
                             // TODO: replace with `.sum` as of Rust 1.11
-                            let number_of_codes = size_area.iter()
-                                .fold(0, |a, b| a + (*b as usize));
+                            let number_of_codes =
+                                size_area.iter().fold(0, |a, b| a + (*b as usize));
 
                             // Code `i` has value `data_area[i]`
-                            let data_area: &[u8] = &vec[huffman_index..huffman_index +
-                                                                       number_of_codes];
+                            let data_area: &[u8] =
+                                &vec[huffman_index..huffman_index + number_of_codes];
                             huffman_index += number_of_codes;
 
                             let huffman_table =
@@ -351,8 +351,8 @@ impl JPEGImage {
                         // We don't need it for simple decoding, but it might be useful
                         // if we want to print info (eg, all headers) for an image.
                         let scan_header = ScanHeader {
-                            num_components: num_components,
-                            scan_components: scan_components,
+                            num_components,
+                            scan_components,
                             start_spectral_selection: vec[i + 1],
                             end_spectral_selection: vec[i + 2],
                             successive_approximation_bit_pos_high: (vec[i + 3] & 0xf0) >> 4,
@@ -364,9 +364,9 @@ impl JPEGImage {
                         if image.scan_headers.is_none() {
                             image.scan_headers = Some(Vec::new());
                         }
-                        image.scan_headers
-                            .as_mut()
-                            .map(|v| v.push(scan_header.clone()));
+                        if let Some(v) = image.scan_headers.as_mut() {
+                            v.push(scan_header.clone())
+                        }
 
                         // Copy data, and replace 0xff00 with 0xff.
                         let mut bytes_skipped = 0;
@@ -384,14 +384,15 @@ impl JPEGImage {
                             }
                         }
 
-
                         let frame_header = image.frame_header.clone().unwrap();
                         let mut jpeg_decoder = JPEGDecoder::new(encoded_data.as_slice())
                             .frame_header(frame_header)
                             // need `.clone()`, or we hit some LLVM bug??
                             .scan_header(scan_header.clone())
-                            .dimensions((image.dimensions.0 as usize,
-                                         image.dimensions.1 as usize));
+                            .dimensions((
+                                image.dimensions.0 as usize,
+                                image.dimensions.1 as usize,
+                            ));
 
                         // Add tables to `jpeg_decoder`
                         for (i, table) in image.huffman_ac_tables.iter().enumerate() {
@@ -418,8 +419,8 @@ impl JPEGImage {
 
                         // Since we are calculating how much data there is in this segment,
                         // we update `i` manually, and `continue` the `while` loop.
-                        i += bytes_read + bytes_skipped;
-                        continue;
+                        // i += bytes_read + bytes_skipped;
+                        // continue;
                     }
                     Marker::RestartIntervalDefinition => {
                         // JPEG B.2.4.4
@@ -449,16 +450,17 @@ impl JPEGImage {
                         panic!("got {:?}", marker);
                     }
                     // Already handled
-                    Marker::StartOfImage |
-                    Marker::EndOfImage => {}
+                    Marker::StartOfImage | Marker::EndOfImage => {}
                 }
                 i += data_length;
             } else {
-                panic!("Unhandled byte marker: {:02x} {:02x} (i={}/{})",
-                       vec[i],
-                       vec[i + 1],
-                       i,
-                       vec.len());
+                panic!(
+                    "Unhandled byte marker: {:02x} {:02x} (i={}/{})",
+                    vec[i],
+                    vec[i + 1],
+                    i,
+                    vec.len()
+                );
             }
         }
         Ok(image)
