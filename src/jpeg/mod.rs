@@ -1,9 +1,9 @@
 pub mod decoder;
 pub mod huffman;
 
-use jpeg::decoder::JPEGDecoder;
-
 use std::str;
+
+use decoder::JPEGDecoder;
 
 // TODO: move this?
 fn u8s_to_u16(bytes: &[u8]) -> u16 {

@@ -1,17 +1,11 @@
-#[macro_use]
-extern crate itertools;
-mod jpeg;
-#[allow(unused_variables)]
-#[allow(dead_code)]
-mod transform;
+use std::{
+    env,
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+};
 
-use std::env;
-use std::fs::File;
-use std::io::Read;
-use std::io::Write;
-use std::path::Path;
-
-use jpeg::JPEGImage;
+use jpeg_rust::JPEGImage;
 
 fn file_to_bytes(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     File::open(path).and_then(|mut file| {

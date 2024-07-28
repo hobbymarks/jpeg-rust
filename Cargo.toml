@@ -2,6 +2,7 @@
 name = "jpeg-rust"
 version = "0.1.0"
 authors = ["Martin Thoresen <martinhath@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 "itertools" = "*"

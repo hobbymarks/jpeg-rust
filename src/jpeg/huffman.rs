@@ -1,5 +1,4 @@
-use std::cmp::min;
-use std::iter::repeat;
+use std::{cmp::min, iter::repeat};
 
 // Selects i bits, from msb to lsb.
 const BIT_MASKS: [u16; 17] = [

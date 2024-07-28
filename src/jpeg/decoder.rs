@@ -1,10 +1,10 @@
-use std::iter::repeat;
+use std::{fmt::Debug, iter::repeat};
 
-use itertools::Itertools;
+use itertools::{izip, Itertools};
 
-use jpeg::huffman;
-use jpeg::{FrameHeader, ScanHeader};
-use transform;
+use crate::transform;
+
+use super::{huffman, FrameHeader, ScanHeader};
 
 type QuantizationTable = Vec<u16>;
 type Block = Vec<f32>;
@@ -440,7 +440,6 @@ where
     res
 }
 
-use std::fmt::Debug;
 #[allow(dead_code)]
 fn zigzag_inverse<I>(iter: I) -> Vec<I::Item>
 where
